@@ -6,8 +6,8 @@ import Image from 'next/image';
 import { Input } from './components/Input';
 import { ArrowUp } from 'lucide-react';
 
-const SimpleMarkdown = ({ children }) => {
-  const formatText = (text) => {
+const SimpleMarkdown = ({ children }: { children: React.ReactNode }) => {
+  const formatText = (text: string) => {
     if (typeof text !== 'string') return text;
     
     // Handle code blocks (```code```)
@@ -47,7 +47,7 @@ const SimpleMarkdown = ({ children }) => {
     <div 
       className="prose prose-sm text-sm leading-relaxed"
       dangerouslySetInnerHTML={{ 
-        __html: `<p class="mb-2">${formatText(children)}</p>` 
+        __html: `<p class="mb-2">${formatText(children as string)}</p>` 
       }} 
     />
   );
@@ -58,49 +58,6 @@ interface Message {
   text: string;
   sender: 'user' | 'bot';
 }
-
-const Chatbot = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  return (
-    <div className="flex flex-col h-full border p-5 w-full gap-4">
-      <div className="flex-1 p-4 h-full border-5 border-[#191919] rounded-lg">
-        <div className="flex flex-col items-center justify-center h-full gap-4">
-        </div>
-      </div>
-
-      <div className="flex-1 p-4 space-y-4 overflow-y-auto border-5 border-[#191919] rounded-lg">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`w-full px-4 py-2 rounded-lg ${
-                message.sender === 'user'
-                  ? 'bg-[#112A46] text-white rounded-br-none' 
-                  : 'bg-white text-gray-800 shadow-md rounded-bl-none border border-gray-200'
-              }`}
-            >
-              <SimpleMarkdown>{message.text}</SimpleMarkdown>
-            </div>
-          </div>
-        ))}
-        
-        <div ref={messagesEndRef} />
-      </div>
-    </div>
-  );
-};
 
 const TaskManager = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -215,7 +172,6 @@ export default function UI() {
   return (
     <div className="flex flex-row gap-4 max-w-7xl mx-auto h-screen">
       <TaskManager />
-      <Chatbot />
     </div>
   );
 }

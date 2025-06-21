@@ -131,16 +131,15 @@ def user_query(user_input: ChatMessage):
         else:
             # If there's no further function call, exit the loop
             final_response = response.choices[0].message.content
-            rprint(response.choices[0])
-            rprint(Panel("Task Completed", style="bold green"))
 
-            url = "http://localhost:7868/api/v1/run/55be23cb-e6c7-4017-a915-473e654253b0"  # The complete API endpoint URL for this flow
+            import requests
+            url = "http://localhost:7868/api/v1/run/b8272446-bcaa-41ee-bfed-2257eafdc38a?stream=false"  # The complete API endpoint URL for this flow
 
             # Request payload configuration
             payload = {
                 "input_value": str(final_response),  # The input value to be processed by the flow
                 "output_type": "chat",  # Specifies the expected output format
-                "input_type": "text"  # Specifies the input format
+                "input_type": "chat"  # Specifies the input format
             }
 
             # Request headers
@@ -154,14 +153,24 @@ def user_query(user_input: ChatMessage):
                 response.raise_for_status()  # Raise exception for bad status codes
 
                 # Print response
-                print(response.text)
+                response_data = response.json()
+                messages = []
+                for output in response_data.get("outputs", []):
+                    for inner_output in output.get("outputs", []):
+                        for message in inner_output.get("messages", []):
+                            messages.append(message.get("message"))
+                
+                markdown_messages = "\n".join(f"{msg}" for msg in messages if msg)
 
             except requests.exceptions.RequestException as e:
                 print(f"Error making API request: {e}")
             except ValueError as e:
                 print(f"Error parsing response: {e}")
 
-            return JSONResponse(content={"response": final_response})        
+            print(final_response)  
+            rprint(Panel("Task Completed", style="bold green"))
+
+            return JSONResponse(content={"response": "## Results: " + f"\n" + final_response + f"\n" + f"## Draft Message and To do List: \n {markdown_messages}"})
 
 
 if __name__ == "__main__":
